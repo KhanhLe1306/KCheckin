@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const Checkbox = ({ id, label, checked, onToggleCheckboxChange }) => {
-	const [localChecked, setLocalChecked] = useState(checked);
+	const [localChecked, setLocalChecked] = useState(false);
+
+	useEffect(() => {
+		setLocalChecked(checked);
+	}, [checked]);
 
 	function toggleCheckboxChange(e) {
 		setLocalChecked(!localChecked);
@@ -11,9 +15,9 @@ const Checkbox = ({ id, label, checked, onToggleCheckboxChange }) => {
 
 	const myStyle = localChecked
 		? {
-			backgroundColor: "rgb(0, 77, 128)",
-			color: "white",
-			fontSize: "bold"
+				backgroundColor: "rgb(0, 77, 128)",
+				color: "white",
+				fontSize: "bold",
 		  }
 		: {
 				backgroundColor: "white",
