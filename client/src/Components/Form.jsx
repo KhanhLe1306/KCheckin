@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useReducer } from "react";
 import Checkbox from "./Checkbox";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -25,73 +25,97 @@ const servicesData = serviceTemplate.map((s) => {
 const nameRegEx = /^[A-Za-z]+$/;
 const phoneRegEx = /^[0-9]{10}$/;
 
+const initialState = {
+	name: "",
+	phone: "",
+	services: servicesData,
+	errors: [],
+};
+
+const formInputReducer = (state, action) => {
+	switch (action.type) {
+		case "name_change": {
+			const value = action.event.target.value;
+			return {
+				...state,
+				name: value,
+				errors: [],
+			};
+		}
+		case "set_error": {
+			return {
+				...state,
+				errors: action.error,
+			};
+		}
+		case "phone_change": {
+			const value = action.event.target.value;
+			return {
+				...state,
+				phone: value,
+				errors: [],
+			};
+		}
+		case "service_change": {
+			const services = state.services.map((s) => {
+				if (s.id === action.serviceId) {
+					return {
+						...s,
+						checked: action.checked,
+					};
+				} else {
+					return s;
+				}
+			});
+			return { ...state, services: services, errors: [] };
+		}
+		case "submit": {
+			console.log("submit");
+			const s = { ...state };
+			const isNameValid = nameRegEx.test(state.name);
+			const isPhoneValid = phoneRegEx.test(state.phone);
+			const noServiceSelected = state.services.every(
+				(x) => x.checked === false
+			);
+			if (noServiceSelected) s.errors.push("Please select at least 1 service");
+			if (!isNameValid)
+				s.errors.push("Your name may contain only alphabet characters");
+			if (!isPhoneValid)
+				s.errors.push("Your phone number may contain only 10 digits");
+			if (s.errors.length === 0) {
+				toast(`Thank you ${s.name} ❤️!`);
+				console.log(s)
+				return { ...initialState };
+			} else {
+				s.errors.forEach((error) => {
+					toast(error);
+				});
+				return s;
+			}
+		}
+		default: {
+		}
+	}
+};
+
 const Form = () => {
-	const [name, setName] = useState("");
-	const [phone, setPhone] = useState("");
-	const [services, setServices] = useState([]);
-	const [validInputs, setValidInputs] = useState(false);
-	const [error, setError] = useState("");
-	const [checkBoxError, setCheckBoxError] = useState("");
-
-	//let disabledButton = true;
-
-	useEffect(() => {
-		setServices(servicesData);
-	}, []);
+	const [input, dispatchInput] = useReducer(formInputReducer, initialState);
 
 	function handleSubmit(e) {
 		e.preventDefault();
-		if (!validInputs) {
-			setError(
-				"Yourname may contain only letters and your phone number may contain only 10 digits"
-			);
-		} else if (services.every((temp) => temp.checked === false)) {
-			setCheckBoxError("Please choose at least 1 service!");
-		} else {
-			setError("");
-			setCheckBoxError("");
-			setName("");
-			setPhone("");
-			setServices([...servicesData]);
-			toast(`Thank you ${name} ❤️!`);
-
-			console.log("Name: ", name);
-			console.log("Phone: ", phone);
-			console.log("Services: ", services);
-			console.log("Valid Inputs: ", validInputs);
-			//proceed
-		}
+		dispatchInput({ type: "submit" });
 	}
 
 	function handleNameChange(e) {
-		const value = e.target.value;
-		const isValid = nameRegEx.test(value);
-		setValidInputs(isValid);
-		setName(e.target.value);
+		dispatchInput({ type: "name_change", event: e });
 	}
 
 	function handlePhoneChange(e) {
-		const value = e.target.value;
-		const isValid = phoneRegEx.test(value);
-		setValidInputs(isValid);
-		setPhone(e.target.value);
+		dispatchInput({ type: "phone_change", event: e });
 	}
 
 	function handleToggleCheckboxChange(id, checked) {
-		const s = services.map((s) => {
-			if (s.id === id) {
-				return {
-					...s,
-					checked: checked,
-				};
-			} else {
-				return s;
-			}
-		});
-		//console.log("Services: ", s);
-		setServices(s);
-		//console.log([...servicesData]);
-		//setServices([...servicesData]);
+		dispatchInput({ type: "service_change", serviceId: id, checked: checked });
 	}
 
 	return (
@@ -103,7 +127,7 @@ const Form = () => {
 						className="rounded-md pl-3 py-1"
 						required
 						type="text"
-						value={name}
+						value={input.name}
 						onChange={handleNameChange}
 						placeholder="Your name"
 					/>
@@ -113,24 +137,18 @@ const Form = () => {
 						className="rounded-md pl-3 py-1"
 						type="text"
 						required
-						value={phone}
+						value={input.phone}
 						onChange={handlePhoneChange}
 						placeholder="Phone number"
 					/>
 				</div>
 			</div>
-			{error && (
-				<div className="text-center" style={{ color: "red" }}>
-					{error}
-				</div>
-			)}
 			<div className="flex w-10/12 mt-20 m-auto bg-blue-400 p-8 rounded-2xl justify-around items-center">
 				<div className="flex-none w-30 mr-10">
 					Please choose your sevice(s):
 				</div>
 				<div className="flex-1 flex gap-5 flex-wrap">
-					{services.map((s) => {
-						//console.log(s);
+					{input.services.map((s) => {
 						return (
 							<Checkbox
 								key={s.id}
@@ -143,11 +161,6 @@ const Form = () => {
 					})}
 				</div>
 			</div>
-			{checkBoxError && (
-				<div className="text-center" style={{ color: "red" }}>
-					{checkBoxError}
-				</div>
-			)}
 			<div className="flex">
 				<input
 					className="cursor-pointer h-8 w-20 rounded-md mt-8 mx-auto bg-blue-400 text-blue font-bold"
