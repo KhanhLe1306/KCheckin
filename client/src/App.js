@@ -1,10 +1,14 @@
 import Home from "./Components/Home";
+import { ToastContainer } from "react-toastify";
+
 function App() {
+  
+
   return (
-    <>
-      <Home />
-    </>
-  );
+		<>
+			<Home />
+		</>
+	);
 }
 
 export default App;

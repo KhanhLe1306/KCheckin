@@ -1,14 +1,21 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Nav from "./Nav";
-import Brand from "./Brand"
+import Brand from "./Brand";
 import Form from "./Form";
+import LoginForm from "./LoginForm";
+import { AuthContext } from "../Context/AuthContextProvider";
 
 const Home = () => {
-    return <div className="h-screen bg-blue-300">
-        <Nav />
-        <Brand />
-        <Form />
-    </div>;
+	const authCtx = useContext(AuthContext);
+
+	return (
+		<div className="h-screen bg-blue-300">
+			<Nav />
+			<Brand />
+			{!authCtx.loggedIn && <LoginForm />}
+			{authCtx.loggedIn && <Form />}
+		</div>
+	);
 };
 
 export default Home;
