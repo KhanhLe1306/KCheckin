@@ -1,121 +1,44 @@
-import React, { useReducer } from "react";
+import React, { useEffect } from "react";
 import Checkbox from "./Checkbox";
-import { ToastContainer, toast } from "react-toastify";
-
+import { useDispatch, useSelector } from "react-redux";
+import {
+	updateName,
+	updatePhone,
+	updateServices,
+	submitFormInput,
+	clearError,
+} from "../store/form/formInputSlice";
+import useToaster from "../hooks/useToaster";
 import "react-toastify/dist/ReactToastify.css";
 
-const serviceTemplate = [
-	"Acrylic set",
-	"Acrylic fill",
-	"Dip powder",
-	"Pedicure",
-	"Shellac Manicure",
-];
-
-let id = 0;
-
-const servicesData = serviceTemplate.map((s) => {
-	return {
-		id: id++,
-		name: s,
-		checked: false,
-	};
-});
-
-const nameRegEx = /^[A-Za-z]+$/;
-const phoneRegEx = /^[0-9]{10}$/;
-
-const initialState = {
-	name: "",
-	phone: "",
-	services: servicesData,
-	errors: [],
-};
-
-const formInputReducer = (state, action) => {
-	switch (action.type) {
-		case "name_change": {
-			const value = action.event.target.value;
-			return {
-				...state,
-				name: value,
-				errors: [],
-			};
-		}
-		case "set_error": {
-			return {
-				...state,
-				errors: action.error,
-			};
-		}
-		case "phone_change": {
-			const value = action.event.target.value;
-			return {
-				...state,
-				phone: value,
-				errors: [],
-			};
-		}
-		case "service_change": {
-			const services = state.services.map((s) => {
-				if (s.id === action.serviceId) {
-					return {
-						...s,
-						checked: action.checked,
-					};
-				} else {
-					return s;
-				}
-			});
-			return { ...state, services: services, errors: [] };
-		}
-		case "submit": {
-			console.log("submit");
-			const s = { ...state };
-			const isNameValid = nameRegEx.test(state.name);
-			const isPhoneValid = phoneRegEx.test(state.phone);
-			const noServiceSelected = state.services.every(
-				(x) => x.checked === false
-			);
-			if (noServiceSelected) s.errors.push("Please select at least 1 service");
-			if (!isNameValid)
-				s.errors.push("Your name may contain only alphabet characters");
-			if (!isPhoneValid)
-				s.errors.push("Your phone number may contain only 10 digits");
-			if (s.errors.length === 0) {
-				toast(`Thank you ${s.name} ❤️!`);
-				console.log(s)
-				return { ...initialState };
-			} else {
-				s.errors.forEach((error) => {
-					toast(error);
-				});
-				return s;
-			}
-		}
-		default: {
-		}
-	}
-};
-
 const Form = () => {
-	const [input, dispatchInput] = useReducer(formInputReducer, initialState);
+	const state = useSelector((s) => s.formInput);
+	const errorMessages = useSelector((s) => s.formInput.errorMessages);
+	const dispatch = useDispatch();
+	const toast = useToaster();
+
+	if (errorMessages.length >= 0) {
+		for (let m of errorMessages) {
+			toast.toastFailure(m);
+		}
+		dispatch(clearError());
+	}
 
 	function handleSubmit(e) {
 		e.preventDefault();
-		dispatchInput({ type: "submit" });
+		dispatch(submitFormInput());
 	}
 
 	function handleNameChange(e) {
-		dispatchInput({ type: "name_change", event: e });
+		dispatch(updateName(e.target.value));
 	}
 
 	function handlePhoneChange(e) {
-		dispatchInput({ type: "phone_change", event: e });
+		dispatch(updatePhone(e.target.value));
 	}
 
 	function handleToggleCheckboxChange(id, checked) {
-		dispatchInput({ type: "service_change", serviceId: id, checked: checked });
+		dispatch(updateServices({ id: id, checked: checked }));
 	}
 
 	return (
@@ -127,7 +50,7 @@ const Form = () => {
 						className="rounded-md pl-3 py-1"
 						required
 						type="text"
-						value={input.name}
+						value={state.name}
 						onChange={handleNameChange}
 						placeholder="Your name"
 					/>
@@ -137,7 +60,7 @@ const Form = () => {
 						className="rounded-md pl-3 py-1"
 						type="text"
 						required
-						value={input.phone}
+						value={state.phone}
 						onChange={handlePhoneChange}
 						placeholder="Phone number"
 					/>
@@ -148,7 +71,7 @@ const Form = () => {
 					Please choose your sevice(s):
 				</div>
 				<div className="flex-1 flex gap-5 flex-wrap">
-					{input.services.map((s) => {
+					{state.services.map((s) => {
 						return (
 							<Checkbox
 								key={s.id}
@@ -168,8 +91,6 @@ const Form = () => {
 					value="Submit"
 				></input>
 			</div>
-
-			<ToastContainer />
 		</form>
 	);
 };
