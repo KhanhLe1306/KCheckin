@@ -1,9 +1,10 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { FormInputState, ServicePayload } from "./interfaces";
+import { toast } from "react-toastify";
 
 let id = 0;
 
-const nameRegEx = /^[A-Za-z]+$/;
+const nameRegEx = /^[A-Z][a-z]+([\s-][A-Z][a-z]+)*$/;
 const phoneRegEx = /^[0-9]{10}$/;
 
 const serviceTemplate = [
@@ -28,7 +29,6 @@ const formInputSlice = createSlice({
 		name: "",
 		phone: "",
 		services: servicesData,
-		errorMessages: [] as string[]
 	} as FormInputState,
 	reducers: {
 		updateName: (state, action: PayloadAction<string>) => {
@@ -53,25 +53,22 @@ const formInputSlice = createSlice({
 		submitFormInput: (state) => {
 			const isNameValid = nameRegEx.test(state.name);
 			const isPhoneValid = phoneRegEx.test(state.phone);
+			if (!isNameValid)
+				toast.error("Your name may contain only alphabet characters");
+			if (!isPhoneValid)
+				toast.error("Your phone number may contain only 10 digits");
 			const noServiceSelected = state.services.every(
 				(x) => x.checked === false
 			);
-			if (noServiceSelected) state.errorMessages.push("Please select at least 1 service");
-			if (!isNameValid)
-				state.errorMessages.push("Your name may contain only alphabet characters");
-			if (!isPhoneValid)
-				state.errorMessages.push("Your phone number may contain only 10 digits");
-			if (state.errorMessages.length !== 0) {
-				// Submit api
-                console.log("Success!!!!!")
-			} 
-        },
-        clearError: state => {
-            state.errorMessages = [] as string[]
-        },
+			if (noServiceSelected) toast.error("Please select at least 1 service");
+			if (isNameValid && isPhoneValid && !noServiceSelected) {
+				console.log("Submitting!!!!");
+			}
+		},
 	},
 });
 
-export const { updateName, updatePhone, updateServices, submitFormInput, clearError } = formInputSlice.actions;
+export const { updateName, updatePhone, updateServices, submitFormInput } =
+	formInputSlice.actions;
 
-export default formInputSlice.reducer
+export default formInputSlice.reducer;

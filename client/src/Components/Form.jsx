@@ -6,35 +6,16 @@ import {
 	updatePhone,
 	updateServices,
 	submitFormInput,
-	clearError,
-} from "../store/form/formInputSlice";
-import useToaster from "../hooks/useToaster";
+} from "../store/formInputSlice/formInputSlice";
 import "react-toastify/dist/ReactToastify.css";
 
 const Form = () => {
 	const state = useSelector((s) => s.formInput);
-	const errorMessages = useSelector((s) => s.formInput.errorMessages);
 	const dispatch = useDispatch();
-	const toast = useToaster();
-
-	if (errorMessages.length >= 0) {
-		for (let m of errorMessages) {
-			toast.toastFailure(m);
-		}
-		dispatch(clearError());
-	}
 
 	function handleSubmit(e) {
 		e.preventDefault();
 		dispatch(submitFormInput());
-	}
-
-	function handleNameChange(e) {
-		dispatch(updateName(e.target.value));
-	}
-
-	function handlePhoneChange(e) {
-		dispatch(updatePhone(e.target.value));
 	}
 
 	function handleToggleCheckboxChange(id, checked) {
@@ -51,7 +32,7 @@ const Form = () => {
 						required
 						type="text"
 						value={state.name}
-						onChange={handleNameChange}
+						onChange={(e) => dispatch(updateName(e.target.value))}
 						placeholder="Your name"
 					/>
 				</div>
@@ -61,7 +42,7 @@ const Form = () => {
 						type="text"
 						required
 						value={state.phone}
-						onChange={handlePhoneChange}
+						onChange={(e) => dispatch(updatePhone(e.target.value))}
 						placeholder="Phone number"
 					/>
 				</div>

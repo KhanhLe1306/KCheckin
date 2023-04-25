@@ -25,7 +25,7 @@ const Checkbox = ({ id, label, checked, onToggleCheckboxChange }) => {
 
 	return (
 		<div style={myStyle} className="rounded-xl">
-			<label className="block cursor-pointer hover:bg-sky-400 py-1 px-4 ">
+			<label className="block cursor-pointer hover:bg-sky-400 py-1 px-4">
 				<input
 					className="hidden"
 					type="checkbox"

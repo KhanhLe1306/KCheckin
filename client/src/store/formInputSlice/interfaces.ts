@@ -2,7 +2,6 @@ export interface FormInputState {
 	name: string;
 	phone: string;
 	services: Service[];
-	errorMessages: string[];
 }
 
 export interface ServicePayload {
