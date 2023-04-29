@@ -19,7 +19,8 @@ namespace server.Data
                     new Service { ServiceId = 2, ServiceName = "Acrylic fill" },
                     new Service { ServiceId = 3, ServiceName = "Dip powder" },
                     new Service { ServiceId = 4, ServiceName = "Pedicure" },
-                    new Service { ServiceId = 5, ServiceName = "Shellac Manicure" }
+                    new Service { ServiceId = 5, ServiceName = "Shellac Manicure" },
+                    new Service { ServiceId = 6, ServiceName = "Regular Manicure" }
             );
         }
     }
