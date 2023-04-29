@@ -1,34 +1,32 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import {
+	PayloadAction,
+	createSlice,
+	createAsyncThunk,
+} from "@reduxjs/toolkit";
 import { FormInputState, ServicePayload } from "./interfaces";
 import { toast } from "react-toastify";
+import axios from "axios";
 
-let id = 0;
 
 const nameRegEx = /^[A-Z][a-z]+([\s-][A-Z][a-z]+)*$/;
 const phoneRegEx = /^[0-9]{10}$/;
 
-const serviceTemplate = [
-	"Acrylic set",
-	"Acrylic fill",
-	"Dip powder",
-	"Pedicure",
-	"Shellac Manicure",
-];
 
-const servicesData = serviceTemplate.map((s) => {
-	return {
-		id: id++,
-		name: s,
-		checked: false,
-	};
-});
+export const fetchServices = createAsyncThunk(
+	"FormInput/fetchServices",
+	async () => {
+		const response = await axios.get("https://localhost:7097/api/nailservice");
+		console.log(response);
+		return response.data;
+	}
+);
 
 const formInputSlice = createSlice({
 	name: "FormInput",
 	initialState: {
 		name: "",
 		phone: "",
-		services: servicesData,
+		services: [],
 	} as FormInputState,
 	reducers: {
 		updateName: (state, action: PayloadAction<string>) => {
@@ -38,7 +36,7 @@ const formInputSlice = createSlice({
 			state.phone = action.payload;
 		},
 		updateServices: (state, action: PayloadAction<ServicePayload>) => {
-			const services = servicesData.map((s) => {
+			const services = state.services.map((s) => {
 				if (s.id === action.payload.id) {
 					return {
 						...s,
@@ -65,6 +63,13 @@ const formInputSlice = createSlice({
 				console.log("Submitting!!!!");
 			}
 		},
+	},
+	extraReducers: (builder) => {
+		builder.addCase(fetchServices.fulfilled, (state, action) => {
+			console.log("here");
+			console.log(action.payload);
+			state.services = action.payload;
+		});
 	},
 });
 

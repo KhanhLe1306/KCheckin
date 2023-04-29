@@ -6,7 +6,7 @@ import {
 	updatePhone,
 	updateServices,
 	submitFormInput,
-} from "../store/formInputSlice/formInputSlice";
+} from "../slices/formInputSlice/formInputSlice";
 import "react-toastify/dist/ReactToastify.css";
 
 const Form = () => {
