@@ -16,7 +16,14 @@ namespace server.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Service>>> AllServices()
         {
+            Console.WriteLine("Get All services");
             return await _nailServicesService.AllServices();
+        }
+        [HttpPost]
+        public async Task<ActionResult<Service>> AddService(Service serviceName)
+        {
+            Console.WriteLine("Add single service");
+            return await _nailServicesService.AddService(serviceName);
         }
     }
 }
